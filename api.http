@@ -1,0 +1,57 @@
+@baseUrl = http://localhost:8080
+
+### Create Patient
+# @name createPatient
+POST {{baseUrl}}/adsweb/api/v1/patients
+Content-Type: application/json
+
+{
+	"firstName": "John",
+	"lastName": "Doe",
+	"phoneNumber": "5155551234",
+	"email": "john.doe@example.com",
+	"dateOfBirth": "1990-05-20",
+	"hasUnpaidBill": false,
+	"address": {
+		"addressLine": "123 Main St",
+		"city": "Fairfield",
+		"state": "IA",
+		"postalCode": "52557"
+	}
+}
+
+### List All Patients
+GET {{baseUrl}}/adsweb/api/v1/patients
+
+### Get Patient By Id (from create response)
+@patientId = {{createPatient.response.body.$.id}}
+GET {{baseUrl}}/adsweb/api/v1/patients/{{patientId}}
+
+### Update Patient
+PUT {{baseUrl}}/adsweb/api/v1/patient/{{patientId}}
+Content-Type: application/json
+
+{
+	"firstName": "John",
+	"lastName": "Doe Updated",
+	"phoneNumber": "5155559999",
+	"email": "john.doe.updated.{{patientId}}@example.com",
+	"dateOfBirth": "1990-05-20",
+	"hasUnpaidBill": true,
+	"address": {
+		"addressLine": "789 Oak Ave",
+		"city": "Des Moines",
+		"state": "IA",
+		"postalCode": "50309"
+	}
+}
+
+### Delete Patient
+DELETE {{baseUrl}}/adsweb/api/v1/patient/{{patientId}}
+
+### Search Patients
+GET {{baseUrl}}/adsweb/api/v1/patient/search/john
+
+### List All Addresses (with patient)
+GET {{baseUrl}}/adsweb/api/v1/addresses
+
