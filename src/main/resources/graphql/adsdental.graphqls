@@ -1,0 +1,57 @@
+type Query {
+  patients: [Patient!]!
+  patientById(id: ID!): Patient
+  searchPatients(searchString: String!): [Patient!]!
+  addresses: [Address!]!
+}
+
+type Mutation {
+  createPatient(input: PatientInput!): Patient!
+  updatePatient(id: ID!, input: PatientInput!): Patient!
+  deletePatient(id: ID!): Boolean!
+}
+
+type Patient {
+  id: ID
+  firstName: String!
+  lastName: String!
+  phoneNumber: String
+  email: String
+  address: Address
+  dateOfBirth: String
+  hasUnpaidBill: Boolean!
+}
+
+type Address {
+  id: ID
+  addressLine: String!
+  city: String!
+  state: String!
+  postalCode: String!
+  patient: PatientSummary
+}
+
+type PatientSummary {
+  id: ID
+  firstName: String
+  lastName: String
+  phoneNumber: String
+  email: String
+}
+
+input PatientInput {
+  firstName: String!
+  lastName: String!
+  phoneNumber: String
+  email: String
+  address: AddressInput!
+  dateOfBirth: String!
+  hasUnpaidBill: Boolean
+}
+
+input AddressInput {
+  addressLine: String!
+  city: String!
+  state: String!
+  postalCode: String!
+}

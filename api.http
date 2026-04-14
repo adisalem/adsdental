@@ -55,3 +55,92 @@ GET {{baseUrl}}/adsweb/api/v1/patient/search/john
 ### List All Addresses (with patient)
 GET {{baseUrl}}/adsweb/api/v1/addresses
 
+### GraphQL - List Patients
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+	"query": "query { patients { id firstName lastName email dateOfBirth hasUnpaidBill address { city state postalCode } } }"
+}
+
+### GraphQL - Create Patient
+# @name createPatientGraphql
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+	"query": "mutation($input: PatientInput!) { createPatient(input: $input) { id firstName lastName email dateOfBirth hasUnpaidBill address { id city state } } }",
+	"variables": {
+		"input": {
+			"firstName": "Alice",
+			"lastName": "Brown",
+			"phoneNumber": "5153332222",
+			"email": "alice.brown@example.com",
+			"dateOfBirth": "1992-10-11",
+			"hasUnpaidBill": false,
+			"address": {
+				"addressLine": "400 Elm St",
+				"city": "Fairfield",
+				"state": "IA",
+				"postalCode": "52557"
+			}
+		}
+	}
+}
+
+### GraphQL - Get Patient By Id
+@graphqlPatientId = {{createPatientGraphql.response.body.$.data.createPatient.id}}
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+	"query": "query($id: ID!) { patientById(id: $id) { id firstName lastName email address { addressLine city state postalCode } } }",
+	"variables": {
+		"id": "{{graphqlPatientId}}"
+	}
+}
+
+### GraphQL - Update Patient
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+	"query": "mutation($id: ID!, $input: PatientInput!) { updatePatient(id: $id, input: $input) { id firstName lastName email hasUnpaidBill address { city state } } }",
+	"variables": {
+		"id": "{{graphqlPatientId}}",
+		"input": {
+			"firstName": "Alice",
+			"lastName": "Brown Updated",
+			"phoneNumber": "5153334444",
+			"email": "alice.brown.updated@example.com",
+			"dateOfBirth": "1992-10-11",
+			"hasUnpaidBill": true,
+			"address": {
+				"addressLine": "900 Cedar Dr",
+				"city": "Des Moines",
+				"state": "IA",
+				"postalCode": "50310"
+			}
+		}
+	}
+}
+
+### GraphQL - Delete Patient
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+	"query": "mutation($id: ID!) { deletePatient(id: $id) }",
+	"variables": {
+		"id": "{{graphqlPatientId}}"
+	}
+}
+
+### GraphQL - List Addresses
+POST {{baseUrl}}/graphql
+Content-Type: application/json
+
+{
+	"query": "query { addresses { id addressLine city state postalCode patient { id firstName lastName } } }"
+}
+
