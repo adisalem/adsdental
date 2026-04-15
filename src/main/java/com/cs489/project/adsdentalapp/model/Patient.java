@@ -3,6 +3,7 @@ package com.cs489.project.adsdentalapp.model;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -68,4 +69,9 @@ public class Patient {
     @Builder.Default
     @Column(name = "has_unpaid_bill", nullable = false)
     private boolean hasUnpaidBill = false;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonManagedReference
+    private User user;
 }

@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.cs489.project.adsdentalapp.dto.auth.AuthResponse;
+import com.cs489.project.adsdentalapp.dto.auth.PatientRegistrationRequest;
 import com.cs489.project.adsdentalapp.dto.patient.PatientRequest;
 import com.cs489.project.adsdentalapp.dto.patient.PatientResponse;
+import com.cs489.project.adsdentalapp.model.Patient;
+import com.cs489.project.adsdentalapp.service.AuthService;
 import com.cs489.project.adsdentalapp.service.PatientService;
 
 import jakarta.validation.Valid;
@@ -28,9 +33,18 @@ import jakarta.validation.Valid;
 public class PatientController {
 
     private final PatientService patientService;
+    private final AuthService authService;
 
-    public PatientController(PatientService patientService) {
+    public PatientController(PatientService patientService, AuthService authService) {
         this.patientService = patientService;
+        this.authService = authService;
+    }
+
+    @PostMapping("/patients/register")
+    public ResponseEntity<AuthResponse> registerPatient(@Valid @RequestBody PatientRegistrationRequest request) {
+        Patient patient = patientService.registerPatient(request);
+        AuthResponse response = authService.generateTokensForUser(patient.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/patients")

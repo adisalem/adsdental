@@ -1,62 +1,252 @@
-@baseUrl = http://localhost:8080
+@baseUrl = http://localhost:8081
 
-### Create Patient
-# @name createPatient
-POST {{baseUrl}}/adsweb/api/v1/patients
+### ========================================
+### AUTHENTICATION ENDPOINTS
+### ========================================
+
+### Generic User Registration (Admin use)
+# @name registerAdmin
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-	"firstName": "John",
-	"lastName": "Doe",
-	"phoneNumber": "5155551234",
-	"email": "john.doe@example.com",
-	"dateOfBirth": "1990-05-20",
-	"hasUnpaidBill": false,
-	"address": {
-		"addressLine": "123 Main St",
-		"city": "Fairfield",
-		"state": "IA",
-		"postalCode": "52557"
-	}
+  "email": "admin@clinic.com",
+  "password": "admin123",
+  "role": "ADMIN"
 }
 
-### List All Patients
+### Login (Admin)
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@clinic.com",
+  "password": "admin123"
+}
+
+###
+
+@adminToken = {{loginAdmin.response.body.$.accessToken}}
+
+### Refresh Token
+POST {{baseUrl}}/api/auth/refresh
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### PATIENT ENDPOINTS (Self-Registration)
+### ========================================
+
+### Patient Self-Registration (Creates User + Patient + Address)
+# @name registerPatient
+POST {{baseUrl}}/adsweb/api/v1/patients/register
+Content-Type: application/json
+
+{
+  "email": "john.patient@clinic.com",
+  "password": "patient123",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "5155551234",
+  "dateOfBirth": "1990-05-20",
+  "addressLine": "123 Main St",
+  "city": "Des Moines",
+  "state": "IA",
+  "postalCode": "50309"
+}
+
+###
+
+@patientToken = {{registerPatient.response.body.$.accessToken}}
+
+### Login as Patient (for subsequent requests)
+# @name loginPatient
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.patient@clinic.com",
+  "password": "patient123"
+}
+
+###
+
+@patientToken2 = {{loginPatient.response.body.$.accessToken}}
+
+### List All Patients (Requires ROLE_ADMIN or ROLE_OFFICE_MANAGER)
 GET {{baseUrl}}/adsweb/api/v1/patients
+Authorization: Bearer {{adminToken}}
 
-### Get Patient By Id (from create response)
-@patientId = {{createPatient.response.body.$.id}}
-GET {{baseUrl}}/adsweb/api/v1/patients/{{patientId}}
+### Get Patient By Id (Accessible by Patient, Admin, Office Manager)
+GET {{baseUrl}}/adsweb/api/v1/patients/1
+Authorization: Bearer {{patientToken2}}
 
-### Update Patient
-PUT {{baseUrl}}/adsweb/api/v1/patient/{{patientId}}
+### Create Patient (Admin/Office Manager use - without password)
+# @name createPatientAdmin
+POST {{baseUrl}}/adsweb/api/v1/patients
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-	"firstName": "John",
-	"lastName": "Doe Updated",
-	"phoneNumber": "5155559999",
-	"email": "john.doe.updated.{{patientId}}@example.com",
-	"dateOfBirth": "1990-05-20",
-	"hasUnpaidBill": true,
-	"address": {
-		"addressLine": "789 Oak Ave",
-		"city": "Des Moines",
-		"state": "IA",
-		"postalCode": "50309"
-	}
+  "firstName": "Robert",
+  "lastName": "Johnson",
+  "phoneNumber": "5155558888",
+  "email": "robert.johnson@clinic.com",
+  "dateOfBirth": "1985-07-22",
+  "hasUnpaidBill": true,
+  "address": {
+    "addressLine": "321 Maple Dr",
+    "city": "Waterloo",
+    "state": "IA",
+    "postalCode": "50701"
+  }
 }
 
-### Delete Patient
-DELETE {{baseUrl}}/adsweb/api/v1/patient/{{patientId}}
+### Update Patient (Patient can update own, Admin can update any)
+PUT {{baseUrl}}/adsweb/api/v1/patient/1
+Authorization: Bearer {{patientToken2}}
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe Updated",
+  "phoneNumber": "5155558888",
+  "email": "john.patient@clinic.com",
+  "dateOfBirth": "1990-05-20",
+  "hasUnpaidBill": false,
+  "address": {
+    "addressLine": "123 Main St Updated",
+    "city": "Fairfield",
+    "state": "IA",
+    "postalCode": "52557"
+  }
+}
+
+### Delete Patient (Admin only)
+DELETE {{baseUrl}}/adsweb/api/v1/patient/11
+Authorization: Bearer {{adminToken}}
 
 ### Search Patients
 GET {{baseUrl}}/adsweb/api/v1/patient/search/john
+Authorization: Bearer {{adminToken}}
 
-### List All Addresses (with patient)
-GET {{baseUrl}}/adsweb/api/v1/addresses
+### ========================================
+### DENTIST ENDPOINTS (Self-Registration)
+### ========================================
+
+### Dentist Self-Registration (Creates User + Dentist)
+# @name registerDentist
+POST {{baseUrl}}/adsweb/api/v1/dentists/register
+Content-Type: application/json
+
+{
+  "email": "dr.smith@clinic.com",
+  "password": "dentist123",
+  "firstName": "Dr.",
+  "lastName": "Smith",
+  "phoneNumber": "5155552222",
+  "specialization": "Orthodontist"
+}
+
+###
+
+@dentistToken = {{registerDentist.response.body.$.accessToken}}
+
+### Login as Dentist (for subsequent requests)
+# @name loginDentist
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dr.smith@clinic.com",
+  "password": "dentist123"
+}
+
+###
+
+@dentistToken2 = {{loginDentist.response.body.$.accessToken}}
+
+### List All Dentists (Accessible by all authenticated users)
+GET {{baseUrl}}/adsweb/api/v1/dentists
+Authorization: Bearer {{dentistToken2}}
+
+### Get Dentist By Id
+GET {{baseUrl}}/adsweb/api/v1/dentists/1
+Authorization: Bearer {{dentistToken2}}
+
+### Create Dentist (Admin only - without password)
+# @name createDentistAdmin
+POST {{baseUrl}}/adsweb/api/v1/dentists
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Dr.",
+  "lastName": "Johnson",
+  "phoneNumber": "5155553333",
+  "email": "dr.johnson.admin@clinic.com",
+  "specialization": "General Dentistry"
+}
+
+### Update Dentist (Dentist can update own, Admin can update any)
+PUT {{baseUrl}}/adsweb/api/v1/dentist/1
+Authorization: Bearer {{dentistToken2}}
+Content-Type: application/json
+
+{
+  "firstName": "Dr.",
+  "lastName": "Smith Updated",
+  "phoneNumber": "5155552222",
+  "email": "dr.smith.updated@clinic.com",
+  "specialization": "Pediatric Dentistry"
+}
+
+### Delete Dentist (Admin only)
+DELETE {{baseUrl}}/adsweb/api/v1/dentist/1
+Authorization: Bearer {{adminToken}}
+
+### Search Dentists
+GET {{baseUrl}}/adsweb/api/v1/dentist/search/smith
+Authorization: Bearer {{dentistToken2}}
+
+### ========================================
+### ROLE-BASED ACCESS CONTROL TESTS
+### ========================================
+
+### Test: Patient tries to create another patient (Should fail - forbidden)
+POST {{baseUrl}}/adsweb/api/v1/patients
+Authorization: Bearer {{patientToken2}}
+Content-Type: application/json
+
+{
+  "firstName": "Unauthorized",
+  "lastName": "Patient",
+  "phoneNumber": "5155555555",
+  "email": "unauthorized@example.com",
+  "dateOfBirth": "1995-01-01",
+  "hasUnpaidBill": false,
+  "address": {
+    "addressLine": "Test",
+    "city": "Test",
+    "state": "IA",
+    "postalCode": "50000"
+  }
+}
+
+### Test: Dentist tries to delete a patient (Should fail - forbidden)
+DELETE {{baseUrl}}/adsweb/api/v1/patient/1
+Authorization: Bearer {{dentistToken2}}
+
+### Test: Request without token (Should fail - unauthorized)
+GET {{baseUrl}}/adsweb/api/v1/patients
+
+### ========================================
+### GRAPHQL EXAMPLES (with JWT)
+### ========================================
 
 ### GraphQL - List Patients
 POST {{baseUrl}}/graphql
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
@@ -66,6 +256,7 @@ Content-Type: application/json
 ### GraphQL - Create Patient
 # @name createPatientGraphql
 POST {{baseUrl}}/graphql
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
@@ -89,8 +280,11 @@ Content-Type: application/json
 }
 
 ### GraphQL - Get Patient By Id
+### NOTE: Run "GraphQL - Create Patient" first to populate {{graphqlPatientId}}
+### If {{graphqlPatientId}} is undefined, this will return an INTERNAL_ERROR
 @graphqlPatientId = {{createPatientGraphql.response.body.$.data.createPatient.id}}
 POST {{baseUrl}}/graphql
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
@@ -101,7 +295,10 @@ Content-Type: application/json
 }
 
 ### GraphQL - Update Patient
+### NOTE: Run "GraphQL - Create Patient" first to populate {{graphqlPatientId}}
+### If {{graphqlPatientId}} is undefined, this will return an INTERNAL_ERROR
 POST {{baseUrl}}/graphql
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
@@ -126,7 +323,10 @@ Content-Type: application/json
 }
 
 ### GraphQL - Delete Patient
+### NOTE: Run "GraphQL - Create Patient" first to populate {{graphqlPatientId}}
+### If {{graphqlPatientId}} is undefined, this will return an INTERNAL_ERROR
 POST {{baseUrl}}/graphql
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
@@ -138,9 +338,17 @@ Content-Type: application/json
 
 ### GraphQL - List Addresses
 POST {{baseUrl}}/graphql
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
 	"query": "query { addresses { id addressLine city state postalCode patient { id firstName lastName } } }"
 }
+
+### ========================================
+### HOME/HEALTH ENDPOINTS
+### ========================================
+
+### Get Application Info
+GET {{baseUrl}}/
 

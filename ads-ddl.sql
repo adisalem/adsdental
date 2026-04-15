@@ -69,3 +69,63 @@ CREATE TABLE IF NOT EXISTS Appointments (
     CONSTRAINT uq_dentist_appointment
         UNIQUE (dentist_id, appointment_date, appointment_time)
 );
+
+-- Roles
+CREATE TABLE IF NOT EXISTS Roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Users
+CREATE TABLE IF NOT EXISTS Users (
+    user_id SERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    dentist_id INT,
+    patient_id INT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT fk_user_dentist
+        FOREIGN KEY (dentist_id)
+        REFERENCES Dentists(dentist_id),
+    CONSTRAINT fk_user_patient
+        FOREIGN KEY (patient_id)
+        REFERENCES Patients(patient_id)
+);
+
+-- User Roles (Many-to-Many mapping)
+CREATE TABLE IF NOT EXISTS UserRoles (
+    user_role_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_role_user
+        FOREIGN KEY (user_id)
+        REFERENCES Users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_role_role
+        FOREIGN KEY (role_id)
+        REFERENCES Roles(role_id) ON DELETE CASCADE,
+    CONSTRAINT uq_user_role
+        UNIQUE (user_id, role_id)
+);
+
+-- Refresh Tokens
+CREATE TABLE IF NOT EXISTS RefreshTokens (
+    token_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(500) NOT NULL UNIQUE,
+    expiry_date TIMESTAMP NOT NULL,
+    revoked BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_refresh_token_user
+        FOREIGN KEY (user_id)
+        REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Insert default roles
+INSERT INTO Roles (role_name) VALUES 
+    ('ROLE_PATIENT'),
+    ('ROLE_DENTIST'),
+    ('ROLE_OFFICE_MANAGER')
+ON CONFLICT DO NOTHING;

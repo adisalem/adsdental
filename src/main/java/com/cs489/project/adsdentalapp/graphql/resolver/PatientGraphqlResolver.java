@@ -71,10 +71,13 @@ public class PatientGraphqlResolver {
     }
 
     private long parseId(String id) {
+        if (id == null || id.trim().isEmpty() || "null".equalsIgnoreCase(id)) {
+            throw new ResourceNotFoundException("Invalid patient id: id cannot be null or empty");
+        }
         try {
             return Long.parseLong(id);
         } catch (NumberFormatException ex) {
-            throw new ResourceNotFoundException("Invalid patient id " + id);
+            throw new ResourceNotFoundException("Invalid patient id: " + id + " is not a valid number");
         }
     }
 
