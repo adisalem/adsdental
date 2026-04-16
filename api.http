@@ -202,7 +202,7 @@ Content-Type: application/json
 }
 
 ### Delete Dentist (Admin only)
-DELETE {{baseUrl}}/adsweb/api/v1/dentist/1
+DELETE {{baseUrl}}/adsweb/api/v1/dentist/5
 Authorization: Bearer {{adminToken}}
 
 ### Search Dentists
