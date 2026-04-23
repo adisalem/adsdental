@@ -1,128 +1,57 @@
 @baseUrl = http://localhost:8081
 
-### Register Dentist (run once)
-POST {{baseUrl}}/api/auth/register
+### ========================================
+### DENTIST DEMO
+### ========================================
+
+### Dentist Self-Registration (first time only)
+# @name registerDentist
+POST {{baseUrl}}/adsweb/api/v1/dentists/register
 Content-Type: application/json
 
 {
-  "email": "dentist@adsdental.com",
-  "password": "Password123!",
-  "role": "DENTIST"
+  "email": "dr.lee@clinic.com",
+  "password": "dentist123",
+  "firstName": "Dr.",
+  "lastName": "Lee",
+  "phoneNumber": "5155557000",
+  "specialization": "Orthodontist"
 }
 
-### Login Dentist (copy accessToken from response)
+### Login Dentist
 # @name loginDentist
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-	"email": "dentist@adsdental.com",
-	"password": "Password123!"
+  "email": "dr.lee@clinic.com",
+  "password": "dentist123"
 }
+
 ###
+@dentistToken = {{loginDentist.response.body.$.accessToken}}
 
-@accessToken = {{loginDentist.response.body.$.accessToken}}
+### Set dentistId if known (from list below)
+@dentistId = 1
 
-### Get All Appointments (Dentist view)
-GET {{baseUrl}}/adsweb/api/v1/appointments
-Authorization: Bearer {{accessToken}}
-
-### Get Appointments By Dentist (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/dentist/1
-Authorization: Bearer {{accessToken}}
-
-### Get Upcoming Appointments By Dentist (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/dentist/1/upcoming
-Authorization: Bearer {{accessToken}}
-
-### Get Appointment By Id (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/11
-Authorization: Bearer {{accessToken}}
-
-### Get Appointments By Surgery (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/surgery/1
-Authorization: Bearer {{accessToken}}
-
-### Create Appointment (replace ids)
-POST {{baseUrl}}/adsweb/api/v1/appointments
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
-
-{
-	"patientId": 1,
-	"dentistId": 1,
-	"surgeryId": 1,
-	"appointmentDate": "2026-06-20",
-	"appointmentTime": "10:00"
-}
-
-### Update Appointment (replace id)
-PUT {{baseUrl}}/adsweb/api/v1/appointment/1
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
-
-{
-	"patientId": 1,
-	"dentistId": 1,
-	"surgeryId": 1,
-	"appointmentDate": "2026-06-21",
-	"appointmentTime": "11:00"
-}
-
-### Reschedule Appointment (replace id)
-PUT {{baseUrl}}/adsweb/api/v1/appointment/1/reschedule
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
-
-{
-	"appointmentDate": "2026-06-22",
-	"appointmentTime": "12:00"
-}
-
-### Cancel Appointment (replace id)
-POST {{baseUrl}}/adsweb/api/v1/appointment/1/cancel
-Authorization: Bearer {{accessToken}}
-
-### Delete Appointment (replace id)
-DELETE {{baseUrl}}/adsweb/api/v1/appointment/1
-Authorization: Bearer {{accessToken}}
-
-### Get All Patients
-GET {{baseUrl}}/adsweb/api/v1/patients
-Authorization: Bearer {{accessToken}}
-
-### Search Patients
-GET {{baseUrl}}/adsweb/api/v1/patient/search/jane
-Authorization: Bearer {{accessToken}}
-
-### Get All Dentists
+### View All Dentists
 GET {{baseUrl}}/adsweb/api/v1/dentists
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{dentistToken}}
 
-### Get All Surgeries
-GET {{baseUrl}}/adsweb/api/v1/surgeries
-Authorization: Bearer {{accessToken}}
+### View My Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments/dentist/{{dentistId}}
+Authorization: Bearer {{dentistToken}}
 
-### Search Surgeries
-GET {{baseUrl}}/adsweb/api/v1/surgery/search/fairfield
-Authorization: Bearer {{accessToken}}
+### View Upcoming Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments/dentist/{{dentistId}}/upcoming
+Authorization: Bearer {{dentistToken}}
 
-### Get All Addresses
-GET {{baseUrl}}/adsweb/api/v1/addresses
-Authorization: Bearer {{accessToken}}
+### View Appointment Details (requires appointmentId)
+@appointmentId = 1
+GET {{baseUrl}}/adsweb/api/v1/appointments/{{appointmentId}}
+Authorization: Bearer {{dentistToken}}
 
-### Get Address By Id (replace id)
-GET {{baseUrl}}/adsweb/api/v1/addresses/1
-Authorization: Bearer {{accessToken}}
-
-### Search Addresses
-GET {{baseUrl}}/adsweb/api/v1/address/search/fairfield
-Authorization: Bearer {{accessToken}}
-
-### Refresh Token
-POST {{baseUrl}}/api/auth/refresh
-Content-Type: application/json
-
-{
-	"refreshToken": "{{loginDentist.response.body.$.refreshToken}}"
-}
+### View Surgery Details (optional)
+@SurgeryId = 1
+GET {{baseUrl}}/adsweb/api/v1/surgeries/{{SurgeryId}}
+Authorization: Bearer {{dentistToken}}

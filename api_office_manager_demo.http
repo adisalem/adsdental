@@ -1,0 +1,115 @@
+@baseUrl = http://localhost:8081
+
+### ========================================
+### OFFICE MANAGER DEMO
+### ========================================
+
+### Register Office Manager (first time only)
+# @name registerOfficeManager
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "office.manager@clinic.com",
+  "password": "manager123",
+  "role": "OFFICE_MANAGER",
+  "firstName": "Olivia",
+  "lastName": "Manager",
+  "phoneNumber": "5155551010"
+}
+
+### Login Office Manager
+# @name loginOfficeManager
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "office.manager@clinic.com",
+  "password": "manager123"
+}
+
+###
+@officeManagerToken = {{loginOfficeManager.response.body.$.accessToken}}
+
+### Create Surgery
+# @name createSurgery
+POST {{baseUrl}}/adsweb/api/v1/surgeries
+Authorization: Bearer {{officeManagerToken}}
+Content-Type: application/json
+
+{
+  "surgeryName": "Downtown Dental",
+  "telephoneNumber": "5155552000",
+  "address": {
+    "addressLine": "100 Main St",
+    "city": "Fairfield",
+    "state": "IA",
+    "postalCode": "52557"
+  }
+}
+
+###
+@surgeryId = {{createSurgery.response.body.$.id}}
+
+### Register New Dentist (Office Manager)
+# @name createDentist
+POST {{baseUrl}}/adsweb/api/v1/dentists
+Authorization: Bearer {{officeManagerToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Dr.",
+  "lastName": "Hale",
+  "phoneNumber": "5155553000",
+  "email": "dr.hale@clinic.com",
+  "specialization": "General Dentistry"
+}
+
+###
+@dentistId = {{createDentist.response.body.$.id}}
+
+### Enroll New Patient (Office Manager)
+# @name createPatient
+POST {{baseUrl}}/adsweb/api/v1/patients
+Authorization: Bearer {{officeManagerToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Maria",
+  "lastName": "Stone",
+  "phoneNumber": "5155554000",
+  "email": "maria.stone@clinic.com",
+  "dateOfBirth": "1993-06-11",
+  "hasUnpaidBill": false,
+  "address": {
+    "addressLine": "450 Elm St",
+    "city": "Fairfield",
+    "state": "IA",
+    "postalCode": "52557"
+  }
+}
+
+###
+@patientId = {{createPatient.response.body.$.id}}
+
+### Book Appointment (Office Manager)
+# @name createAppointment
+POST {{baseUrl}}/adsweb/api/v1/appointments
+Authorization: Bearer {{officeManagerToken}}
+Content-Type: application/json
+
+{
+  "patientId": {{patientId}},
+  "dentistId": {{dentistId}},
+  "surgeryId": {{surgeryId}},
+  "appointmentDate": "2026-05-10",
+  "appointmentTime": "10:30"
+}
+
+### List All Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments
+Authorization: Bearer {{officeManagerToken}}
+
+### Search Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments/search?patientSearchString=maria&dentistSearchString=hale&surgerySearchString=downtown
+Authorization: Bearer {{officeManagerToken}}

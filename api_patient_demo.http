@@ -1,120 +1,92 @@
 @baseUrl = http://localhost:8081
 
-### Register Patient (run once)
-POST {{baseUrl}}/api/auth/register
+### ========================================
+### PATIENT DEMO
+### ========================================
+
+### Patient Self-Registration (creates User + Patient + Address)
+# @name registerPatient
+POST {{baseUrl}}/adsweb/api/v1/patients/register
 Content-Type: application/json
 
 {
-  "email": "patient@example.com",
-  "password": "Password123!",
-  "role": "PATIENT"
+  "email": "jane.patient@clinic.com",
+  "password": "patient123",
+  "firstName": "Jane",
+  "lastName": "Patient",
+  "phoneNumber": "5155556000",
+  "dateOfBirth": "1991-03-18",
+  "addressLine": "88 Oak Dr",
+  "city": "Fairfield",
+  "state": "IA",
+  "postalCode": "52557"
 }
 
-### Login Patient (copy accessToken from response)
+###
+@patientToken = {{registerPatient.response.body.$.accessToken}}
+
+### Login Patient (if already registered)
 # @name loginPatient
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-	"email": "patient@example.com",
-	"password": "Password123!"
+  "email": "jane.patient@clinic.com",
+  "password": "patient123"
 }
+
 ###
+@patientToken2 = {{loginPatient.response.body.$.accessToken}}
 
-@accessToken = {{loginPatient.response.body.$.accessToken}}
-
-### Get All Appointments (Patient view)
-GET {{baseUrl}}/adsweb/api/v1/appointments
-Authorization: Bearer {{accessToken}}
-
-### Get Appointments By Patient (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/patient/1
-Authorization: Bearer {{accessToken}}
-
-### Get Upcoming Appointments By Patient (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/patient/1/upcoming
-Authorization: Bearer {{accessToken}}
-
-### Get Appointment By Id (replace id)
-GET {{baseUrl}}/adsweb/api/v1/appointments/11
-Authorization: Bearer {{accessToken}}
-
-### Create Appointment (replace ids)
-POST {{baseUrl}}/adsweb/api/v1/appointments
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
-
-{
-	"patientId": 1,
-	"dentistId": 1,
-	"surgeryId": 1,
-	"appointmentDate": "2026-06-15",
-	"appointmentTime": "14:00"
-}
-
-### Update Appointment (replace id)
-PUT {{baseUrl}}/adsweb/api/v1/appointment/1
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
-
-{
-	"patientId": 1,
-	"dentistId": 1,
-	"surgeryId": 1,
-	"appointmentDate": "2026-06-16",
-	"appointmentTime": "15:00"
-}
-
-### Reschedule Appointment (replace id)
-PUT {{baseUrl}}/adsweb/api/v1/appointment/1/reschedule
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
-
-{
-	"appointmentDate": "2026-06-17",
-	"appointmentTime": "16:00"
-}
-
-### Cancel Appointment (replace id)
-POST {{baseUrl}}/adsweb/api/v1/appointment/1/cancel
-Authorization: Bearer {{accessToken}}
-
-### Delete Appointment (replace id)
-DELETE {{baseUrl}}/adsweb/api/v1/appointment/1
-Authorization: Bearer {{accessToken}}
-
-### Get All Dentists
+### List Dentists (pick a dentistId for appointment request)
 GET {{baseUrl}}/adsweb/api/v1/dentists
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{patientToken2}}
 
-### Search Dentists
-GET {{baseUrl}}/adsweb/api/v1/dentist/search/andrew
-Authorization: Bearer {{accessToken}}
-
-### Get All Surgeries
+### List Surgeries (pick a surgeryId for appointment request)
 GET {{baseUrl}}/adsweb/api/v1/surgeries
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{patientToken2}}
 
-### Search Surgeries
-GET {{baseUrl}}/adsweb/api/v1/surgery/search/fairfield
-Authorization: Bearer {{accessToken}}
+### Set these after checking the lists above
+@dentistId = 1
+@surgeryId = 1
+@patientId = 1
 
-### Get All Addresses
-GET {{baseUrl}}/adsweb/api/v1/addresses
-Authorization: Bearer {{accessToken}}
-
-### Get Address By Id (replace id)
-GET {{baseUrl}}/adsweb/api/v1/addresses/1
-Authorization: Bearer {{accessToken}}
-
-### Search Addresses
-GET {{baseUrl}}/adsweb/api/v1/address/search/fairfield
-Authorization: Bearer {{accessToken}}
-
-### Refresh Token
-POST {{baseUrl}}/api/auth/refresh
+### Request Appointment (online)
+# @name requestAppointment
+POST {{baseUrl}}/adsweb/api/v1/appointments
+Authorization: Bearer {{patientToken2}}
 Content-Type: application/json
 
 {
-	"refreshToken": "{{loginPatient.response.body.$.refreshToken}}"
+  "patientId": {{patientId}},
+  "dentistId": {{dentistId}},
+  "surgeryId": {{surgeryId}},
+  "appointmentDate": "2026-05-12",
+  "appointmentTime": "14:00"
 }
+
+###
+@appointmentId = {{requestAppointment.response.body.$.id}}
+
+### View My Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments/patient/{{patientId}}
+Authorization: Bearer {{patientToken2}}
+
+### View Appointment Details
+GET {{baseUrl}}/adsweb/api/v1/appointments/{{appointmentId}}
+Authorization: Bearer {{patientToken2}}
+
+### Request Appointment Change (Reschedule)
+PUT {{baseUrl}}/adsweb/api/v1/appointment/{{appointmentId}}/reschedule
+Authorization: Bearer {{patientToken2}}
+Content-Type: application/json
+
+{
+  "newAppointmentDate": "2026-05-20",
+  "newAppointmentTime": "09:00",
+  "reason": "Need a morning slot"
+}
+
+### Request Appointment Cancellation
+POST {{baseUrl}}/adsweb/api/v1/appointment/{{appointmentId}}/cancel
+Authorization: Bearer {{patientToken2}}
