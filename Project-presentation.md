@@ -35,15 +35,14 @@
 - System records and stores appointments (date, time, patient, dentist, surgery)
 - Patient views assigned dentist details
 - Dentist views assigned appointments and patient details for scheduled visits
-- Patient requests appointment cancellation or change
+- Patient requests appointment cancellation or change (post-presentation fix)
 
 ### 3.4 Notifications
-- System sends appointment confirmation email to patients upon booking
+- Email appointment booking and cancellation notifications are a future improvement
 
 ### 3.5 Business Rules
 - System enforces a maximum of 5 appointments per dentist per week
-- System checks for unpaid bills before allowing new appointment requests
-- System blocks appointment requests when unpaid bills exist
+- Unpaid-bill checks and blocking are post-presentation fixes
 
 ### 3.6 Surgery Management
 - System maintains surgery information (name, address, phone)
@@ -63,7 +62,7 @@
 ![alt text](screenshots/ADS_Domain_Model.png)
 
 ### 4.2 System Architecture
-- Frontend UI for role-based workflows (Office Manager, Dentist, Patient)
+- Frontend UI for role-based workflows (Office Manager, Dentist, Patient) is planned
 - REST API layer with validation and business rules
 - Service layer for scheduling, billing checks, and notifications
 - PostgreSQL database for persistent storage
@@ -88,9 +87,8 @@
 - Core workflows are supported end-to-end: registration, scheduling, and appointment management.
 - Business rules and security are enforced through validation and role-based access.
 - Containerized deployment will be completed and submitted by the deadline.
-- Future improvements include a full frontend UI, online payments, SMS/email reminders, and smarter scheduling.
+- Future improvements include a full frontend UI, online payments, email appointment booking and cancellation notifications, and smarter scheduling.
+- Post-presentation fixes include unpaid-bill checks and appointment cancellation flows.
 
-  ## 6. Demo
--
-
+## 6. Demo
 
