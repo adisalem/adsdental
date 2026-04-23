@@ -78,7 +78,7 @@ GET {{baseUrl}}/adsweb/api/v1/patients
 Authorization: Bearer {{adminToken}}
 
 ### Get Patient By Id (Accessible by Patient, Admin, Office Manager)
-GET {{baseUrl}}/adsweb/api/v1/patients/1
+GET {{baseUrl}}/adsweb/api/v1/patients/10
 Authorization: Bearer {{patientToken2}}
 
 ### Create Patient (Admin/Office Manager use - without password)

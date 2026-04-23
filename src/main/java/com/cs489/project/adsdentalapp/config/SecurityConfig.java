@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -48,22 +50,25 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/", "/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
                 .requestMatchers("/graphql").permitAll()
+                // Swagger UI and OpenAPI documentation - Allow public access
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs", "/api-docs.yaml").permitAll()
                 // Public registration endpoints
                 .requestMatchers(HttpMethod.POST, "/adsweb/api/v1/patients/register").permitAll()
                 .requestMatchers(HttpMethod.POST, "/adsweb/api/v1/dentists/register").permitAll()
-                // Admin/Office Manager - Create, Update, Delete patients
-                .requestMatchers(HttpMethod.POST, "/adsweb/api/v1/patients").hasAnyRole("ADMIN", "OFFICE_MANAGER")
-                .requestMatchers(HttpMethod.PUT, "/adsweb/api/v1/patient/**").hasAnyRole("ADMIN", "OFFICE_MANAGER", "PATIENT")
-                .requestMatchers(HttpMethod.DELETE, "/adsweb/api/v1/patient/**").hasRole("ADMIN")
-                // Admin/Office Manager - Create, Update, Delete dentists
-                .requestMatchers(HttpMethod.POST, "/adsweb/api/v1/dentists").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/adsweb/api/v1/dentist/**").hasAnyRole("ADMIN", "DENTIST")
-                .requestMatchers(HttpMethod.DELETE, "/adsweb/api/v1/dentist/**").hasRole("ADMIN")
+                // Office Manager - Create, Update, Delete patients
+                .requestMatchers(HttpMethod.POST, "/adsweb/api/v1/patients").hasRole("OFFICE_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/adsweb/api/v1/patient/**").hasAnyRole("OFFICE_MANAGER", "PATIENT")
+                .requestMatchers(HttpMethod.DELETE, "/adsweb/api/v1/patient/**").hasRole("OFFICE_MANAGER")
+                // Office Manager - Create, Update, Delete dentists
+                .requestMatchers(HttpMethod.POST, "/adsweb/api/v1/dentists").hasRole("OFFICE_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/adsweb/api/v1/dentist/**").hasAnyRole("OFFICE_MANAGER", "DENTIST")
+                .requestMatchers(HttpMethod.DELETE, "/adsweb/api/v1/dentist/**").hasRole("OFFICE_MANAGER")
                 // Patient endpoints - Read access
-                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/patients/**").hasAnyRole("PATIENT", "DENTIST", "OFFICE_MANAGER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/patient/**").hasAnyRole("PATIENT", "DENTIST", "OFFICE_MANAGER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/dentists/**").hasAnyRole("PATIENT", "DENTIST", "OFFICE_MANAGER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/dentist/**").hasAnyRole("PATIENT", "DENTIST", "OFFICE_MANAGER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/patients/**").hasAnyRole("PATIENT", "DENTIST", "OFFICE_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/patient/**").hasAnyRole("PATIENT", "DENTIST", "OFFICE_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/dentists").hasAnyRole("OFFICE_MANAGER", "PATIENT")
+                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/dentists/**").hasAnyRole("OFFICE_MANAGER", "PATIENT", "DENTIST")
+                .requestMatchers(HttpMethod.GET, "/adsweb/api/v1/dentist/**").hasAnyRole("OFFICE_MANAGER", "PATIENT", "DENTIST")
                 // Any other request requires authentication
                 .anyRequest().authenticated()
             )

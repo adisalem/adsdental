@@ -42,8 +42,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
 
+                log.info("JWT roles for user {}: {}", email, authorities);
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    new UsernamePasswordAuthenticationToken(email, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.debug("Set Spring Security authentication for user: {}", email);
             }

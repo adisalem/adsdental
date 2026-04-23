@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +49,7 @@ public class DentistController {
     }
 
     @PostMapping("/dentists")
+    @PreAuthorize("hasRole('OFFICE_MANAGER')")
     public ResponseEntity<DentistResponse> createDentist(@Valid @RequestBody DentistRequest request) {
         DentistResponse response = dentistService.createDentist(request);
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -58,27 +60,32 @@ public class DentistController {
     }
 
     @PutMapping("/dentist/{id}")
+    @PreAuthorize("hasAnyRole('OFFICE_MANAGER', 'DENTIST')")
     public ResponseEntity<DentistResponse> updateDentist(@PathVariable Long id, @Valid @RequestBody DentistRequest request) {
         return ResponseEntity.ok(dentistService.updateDentist(id, request));
     }
 
     @GetMapping("/dentists/{id}")
+    @PreAuthorize("hasAnyRole('OFFICE_MANAGER', 'DENTIST', 'PATIENT')")
     public ResponseEntity<DentistResponse> getDentistById(@PathVariable Long id) {
         return ResponseEntity.ok(dentistService.getDentistById(id));
     }
 
     @GetMapping("/dentists")
+    @PreAuthorize("hasAnyRole('OFFICE_MANAGER', 'PATIENT')")
     public ResponseEntity<List<DentistResponse>> getAllDentists() {
         return ResponseEntity.ok(dentistService.getAllDentists());
     }
 
     @DeleteMapping("/dentist/{id}")
+    @PreAuthorize("hasRole('OFFICE_MANAGER')")
     public ResponseEntity<Map<String, String>> deleteDentist(@PathVariable Long id) {
         dentistService.deleteDentist(id);
         return ResponseEntity.ok(Map.of("message", "Dentist deleted successfully"));
     }
 
     @GetMapping("/dentist/search/{searchString}")
+    @PreAuthorize("hasAnyRole('OFFICE_MANAGER', 'PATIENT')")
     public ResponseEntity<List<DentistResponse>> searchDentists(@PathVariable String searchString) {
         return ResponseEntity.ok(dentistService.searchDentists(searchString));
     }

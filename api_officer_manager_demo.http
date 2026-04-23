@@ -1,0 +1,278 @@
+
+@baseUrl = http://localhost:8081
+
+### Register Office Manager (run once)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "office.manager@adsdental.com",
+  "password": "Password123!",
+  "role": "OFFICE_MANAGER"
+}
+
+### Login Office Manager (copy accessToken from response)
+# @name loginOfficeManager
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+	"email": "office.manager@adsdental.com",
+	"password": "Password123!"
+}
+###
+
+@accessToken = {{loginOfficeManager.response.body.$.accessToken}}
+### Create Surgery
+POST {{baseUrl}}/adsweb/api/v1/surgeries
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"surgeryName": "ADS Dental - Fairfield",
+	"telephoneNumber": "641-555-0101",
+	"address": {
+		"addressLine": "1000 N 4th St",
+		"city": "Fairfield",
+		"state": "IA",
+		"postalCode": "52557"
+	}
+}
+
+### Create Dentist
+POST {{baseUrl}}/adsweb/api/v1/dentists
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"firstName": "Andrew",
+	"lastName": "Smith",
+	"phoneNumber": "641-555-0202",
+	"email": "andrew.smith@adsdental.com",
+	"specialization": "Orthodontist"
+}
+
+### Create Patient
+POST {{baseUrl}}/adsweb/api/v1/patients
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"firstName": "Jane",
+	"lastName": "Doe",
+	"phoneNumber": "641-555-0303",
+	"email": "jane.doe@example.com",
+	"address": {
+		"addressLine": "200 E Burlington Ave",
+		"city": "Fairfield",
+		"state": "IA",
+		"postalCode": "52556"
+	},
+	"dateOfBirth": "1993-05-12",
+	"hasUnpaidBill": false
+}
+
+### Create Appointment (replace ids)
+POST {{baseUrl}}/adsweb/api/v1/appointments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"patientId": 2,
+	"dentistId": 2,
+	"surgeryId": 2,
+	"appointmentDate": "2026-05-10",
+	"appointmentTime": "09:30"
+}
+
+### Get All Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments
+Authorization: Bearer {{accessToken}}
+
+### Get All Patients
+GET {{baseUrl}}/adsweb/api/v1/patients
+Authorization: Bearer {{accessToken}}
+
+### Get All Dentists
+GET {{baseUrl}}/adsweb/api/v1/dentists
+Authorization: Bearer {{accessToken}}
+
+### Search Dentists
+GET {{baseUrl}}/adsweb/api/v1/dentist/search/andrew
+Authorization: Bearer {{accessToken}}
+
+### Search Patients
+GET {{baseUrl}}/adsweb/api/v1/patient/search/jane
+Authorization: Bearer {{accessToken}}
+
+### Search Surgeries
+GET {{baseUrl}}/adsweb/api/v1/surgery/search/fairfield
+Authorization: Bearer {{accessToken}}
+
+### Update Patient (replace id)
+PUT {{baseUrl}}/adsweb/api/v1/patient/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"firstName": "Jane",
+	"lastName": "Doe",
+	"phoneNumber": "641-555-0303",
+	"email": "jane.doe@example.com",
+	"address": {
+		"addressLine": "200 E Burlington Ave",
+		"city": "Fairfield",
+		"state": "IA",
+		"postalCode": "52556"
+	},
+	"dateOfBirth": "1993-05-12",
+	"hasUnpaidBill": false
+}
+
+### Delete Patient (replace id)
+DELETE {{baseUrl}}/adsweb/api/v1/patient/9
+Authorization: Bearer {{accessToken}}
+
+### Update Dentist (replace id)
+PUT {{baseUrl}}/adsweb/api/v1/dentist/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"firstName": "Andrew",
+	"lastName": "Smith",
+	"phoneNumber": "641-555-0202",
+	"email": "andrew.smith@adsdental.com",
+	"specialization": "Orthodontist"
+}
+
+### Delete Dentist (replace id)
+DELETE {{baseUrl}}/adsweb/api/v1/dentist/1
+Authorization: Bearer {{accessToken}}
+
+### Update Surgery (replace id)
+PUT {{baseUrl}}/adsweb/api/v1/surgery/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"surgeryName": "ADS Dental - Fairfield",
+	"telephoneNumber": "641-555-0101",
+	"address": {
+		"addressLine": "1000 N 4th St",
+		"city": "Fairfield",
+		"state": "IA",
+		"postalCode": "52557"
+	}
+}
+
+### Delete Surgery (replace id)
+DELETE {{baseUrl}}/adsweb/api/v1/surgery/1
+Authorization: Bearer {{accessToken}}
+
+### Create Address
+POST {{baseUrl}}/adsweb/api/v1/addresses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"addressLine": "300 W Broadway",
+	"city": "Fairfield",
+	"state": "IA",
+	"postalCode": "52557"
+}
+
+### Update Address (replace id)
+PUT {{baseUrl}}/adsweb/api/v1/address/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"addressLine": "300 W Broadway",
+	"city": "Fairfield",
+	"state": "IA",
+	"postalCode": "52557"
+}
+
+### Get Address By Id (replace id)
+GET {{baseUrl}}/adsweb/api/v1/addresses/1
+Authorization: Bearer {{accessToken}}
+
+### Get All Addresses
+GET {{baseUrl}}/adsweb/api/v1/addresses
+Authorization: Bearer {{accessToken}}
+
+### Search Addresses
+GET {{baseUrl}}/adsweb/api/v1/address/search/fairfield
+Authorization: Bearer {{accessToken}}
+
+### Delete Address (replace id)
+DELETE {{baseUrl}}/adsweb/api/v1/address/1
+Authorization: Bearer {{accessToken}}
+
+### Update Appointment (replace id)
+PUT {{baseUrl}}/adsweb/api/v1/appointment/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"patientId": 1,
+	"dentistId": 1,
+	"surgeryId": 1,
+	"appointmentDate": "2026-05-11",
+	"appointmentTime": "10:30"
+}
+
+### Get Appointment By Id (replace id)
+GET {{baseUrl}}/adsweb/api/v1/appointments/11
+Authorization: Bearer {{accessToken}}
+
+### Get Appointments By Patient (replace id)
+GET {{baseUrl}}/adsweb/api/v1/appointments/patient/1
+Authorization: Bearer {{accessToken}}
+
+### Get Upcoming Appointments By Patient (replace id)
+GET {{baseUrl}}/adsweb/api/v1/appointments/patient/1/upcoming
+Authorization: Bearer {{accessToken}}
+
+### Get Appointments By Dentist (replace id)
+GET {{baseUrl}}/adsweb/api/v1/appointments/dentist/1
+Authorization: Bearer {{accessToken}}
+
+### Get Upcoming Appointments By Dentist (replace id)
+GET {{baseUrl}}/adsweb/api/v1/appointments/dentist/1/upcoming
+Authorization: Bearer {{accessToken}}
+
+### Get Appointments By Surgery (replace id)
+GET {{baseUrl}}/adsweb/api/v1/appointments/surgery/1
+Authorization: Bearer {{accessToken}}
+
+### Search Appointments
+GET {{baseUrl}}/adsweb/api/v1/appointments/search?patientSearchString=jane&dentistSearchString=andrew&surgerySearchString=fairfield
+Authorization: Bearer {{accessToken}}
+
+### Cancel Appointment (replace id)
+POST {{baseUrl}}/adsweb/api/v1/appointment/1/cancel
+Authorization: Bearer {{accessToken}}
+
+### Reschedule Appointment (replace id)
+PUT {{baseUrl}}/adsweb/api/v1/appointment/11/reschedule
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"appointmentDate": "2026-05-12",
+	"appointmentTime": "11:00"
+}
+
+### Delete Appointment (replace id)
+DELETE {{baseUrl}}/adsweb/api/v1/appointment/19
+Authorization: Bearer {{accessToken}}
+
+### Refresh Token
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+	"refreshToken": "{{loginOfficeManager.response.body.$.refreshToken}}"
+}

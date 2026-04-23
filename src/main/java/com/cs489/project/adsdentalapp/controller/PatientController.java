@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +49,7 @@ public class PatientController {
     }
 
     @PostMapping("/patients")
+    @PreAuthorize("hasRole('OFFICE_MANAGER')")
     public ResponseEntity<PatientResponse> createPatient(@Valid @RequestBody PatientRequest request) {
         PatientResponse response = patientService.createPatient(request);
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -58,27 +60,32 @@ public class PatientController {
     }
 
     @PutMapping("/patient/{id}")
+    @PreAuthorize("hasAnyRole('OFFICE_MANAGER', 'PATIENT')")
     public ResponseEntity<PatientResponse> updatePatient(@PathVariable Long id, @Valid @RequestBody PatientRequest request) {
         return ResponseEntity.ok(patientService.updatePatient(id, request));
     }
 
     @GetMapping("/patients/{id}")
+    @PreAuthorize("hasAnyRole('OFFICE_MANAGER', 'PATIENT')")
     public ResponseEntity<PatientResponse> getPatientById(@PathVariable Long id) {
         return ResponseEntity.ok(patientService.getPatientById(id));
     }
 
     @GetMapping("/patients")
+    @PreAuthorize("hasRole('OFFICE_MANAGER')")
     public ResponseEntity<List<PatientResponse>> getAllPatients() {
         return ResponseEntity.ok(patientService.getAllPatients());
     }
 
     @DeleteMapping("/patient/{id}")
+    @PreAuthorize("hasRole('OFFICE_MANAGER')")
     public ResponseEntity<Map<String, String>> deletePatient(@PathVariable Long id) {
         patientService.deletePatient(id);
         return ResponseEntity.ok(Map.of("message", "Patient deleted successfully"));
     }
 
     @GetMapping("/patient/search/{searchString}")
+    @PreAuthorize("hasRole('OFFICE_MANAGER')")
     public ResponseEntity<List<PatientResponse>> searchPatients(@PathVariable String searchString) {
         return ResponseEntity.ok(patientService.searchPatients(searchString));
     }

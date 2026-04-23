@@ -146,7 +146,7 @@ public class PatientServiceImpl implements PatientService {
         userRole.setAssignedAt(LocalDateTime.now());
         userRoleRepository.save(userRole);
 
-        log.info("Patient created successfully by admin: {}", request.getEmail());
+        log.info("Patient created successfully by office manager: {}", request.getEmail());
         return toResponse(savedPatient);
     }
 

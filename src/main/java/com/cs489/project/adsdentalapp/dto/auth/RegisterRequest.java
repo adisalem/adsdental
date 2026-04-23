@@ -21,9 +21,8 @@ public class RegisterRequest {
     private String password;
 
     @NotBlank(message = "Role is required")
-    private String role; // PATIENT, DENTIST, OFFICE_MANAGER, ADMIN
+    private String role; // PATIENT, DENTIST, OFFICE_MANAGER
 
-    // For patient registration
     private String firstName;
     private String lastName;
     private String phoneNumber;

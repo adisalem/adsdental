@@ -133,7 +133,7 @@ public class DentistServiceImpl implements DentistService {
         userRole.setAssignedAt(LocalDateTime.now());
         userRoleRepository.save(userRole);
 
-        log.info("Dentist created successfully by admin: {}", request.getEmail());
+        log.info("Dentist created successfully by office manager: {}", request.getEmail());
         return toResponse(savedDentist);
     }
 
